@@ -1,0 +1,210 @@
+import audioPluginSchema from "../models/pluginModel.js";
+import asyncHandler from "express-async-handler";
+import mongoose from "mongoose";
+import adminList from "../data/adminList.js";
+
+function getAudioPluginModelAndCollection(user) {
+  let collection = user ? user._id : "all-plugins";
+  if (user && adminList["all-plugins"].includes(user._id)) {
+    collection = "all-plugins";
+  }
+  return mongoose.model(collection, audioPluginSchema);
+}
+//getAudioPlugins function to get all plugins
+export const getAudioPlugins = asyncHandler(async (req, res) => {
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+  const audioPlugins = await AudioPlugin.find({});
+  res.json(audioPlugins);
+});
+
+//getAudioPluginById function to retrieve user by id
+export const getAudioPluginById = asyncHandler(async (req, res) => {
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+  const audioPlugin = await AudioPlugin.findById(req.params.id);
+
+  //if user id match param id send user else throw error
+  if (audioPlugin) {
+    res.json(audioPlugin);
+  } else {
+    res.status(404).json({ message: "Plugin not found" });
+    res.status(404);
+    throw new Error("Plugin not found");
+  }
+});
+
+/// ADD A PLUGINS ////////////////////////////
+export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
+  console.log("Saving A Plugin");
+  const audioPlugin = req.body.theData;
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+
+  if (req.user) {
+    const newAudioPlugin = new AudioPlugin(audioPlugin);
+    newAudioPlugin
+      .save()
+      .then((doc) => {
+        res.json(doc);
+        return;
+      })
+      .catch((err) => {
+        console.log("err", err);
+        res
+          .status(404)
+          .json({ message: "Error when trying to save the plugin.", err: err });
+        res.status(404);
+        return new Error("Error saving plugin.");
+      });
+  } else {
+    return res.status(401).json({ message: "Unauthorized user 1!!" });
+  }
+});
+
+/// ADD MANY PLUGINS /////////////////////////////
+export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
+  console.log("Saving Multiple Plugins");
+  const audioPlugin = req.body.theData;
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+
+  if (req.user) {
+    const newAudioPlugin = new AudioPlugin(audioPlugin);
+    newAudioPlugin.collection
+      .insertMany(audioPlugin, {
+        ordered: false,
+      })
+      .then((doc) => {
+        res.json(doc);
+        return;
+      })
+      .catch((err) => {
+        console.log("err", err);
+        res
+          .status(404)
+          .json({ message: "Error when trying to save the plugin.", err: err });
+        res.status(404);
+      });
+  } else {
+    return res.status(401).json({ message: "Unauthorized user 1!!" });
+  }
+});
+
+export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
+  const dataObj = req.query;
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+
+  // Convert strings to numbers where needed
+  function groomObjectForDB(dataObj) {
+    const requiresNumber = ["rating"];
+    const requiresBoolean = ["oversampling", "favorite"];
+    const newDataObj = {};
+
+    const stringToBoolean = (string) => {
+      switch (string.toLowerCase().trim()) {
+        case "true":
+        case "yes":
+        case "1":
+          return true;
+
+        case "false":
+        case "no":
+        case "0":
+        case null:
+          return false;
+
+        default:
+          return Boolean(string);
+      }
+    };
+
+    for (const key in dataObj) {
+      if (requiresNumber.includes(key)) {
+        const newNumber = dataObj[key];
+
+        newDataObj[key] = parseFloat(dataObj[key].replace('"', ""));
+      } else if (requiresBoolean.includes(key)) {
+        if (dataObj[key].constructor === String) {
+          newDataObj[key] = stringToBoolean(dataObj[key]);
+        }
+      } else {
+        newDataObj[key] = dataObj[key];
+      }
+    }
+
+    return newDataObj;
+  }
+
+  const groomedDataObject = groomObjectForDB(dataObj);
+
+  AudioPlugin.findOneAndUpdate(
+    { _id: dataObj.id },
+    {
+      $set: groomedDataObject,
+    }
+  )
+    .then((doc) => {
+      res.status(200).json({ message: "It worked.", doc: doc });
+      res.status(200);
+    })
+    .catch((err) => {
+      console.log("err", err);
+      res
+        .status(404)
+        .json({ message: "Error when trying to save the plugin.", err: err });
+      res.status(404);
+      throw new Error("Error saving plugin.");
+    });
+});
+
+export const RemoveAudioPlugin = asyncHandler(async (req, res) => {
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+
+  AudioPlugin.deleteOne({ _id: req.params.id })
+    .then((doc) => {
+      res.json(doc);
+    })
+    .catch((err) => {
+      console.log("err", err);
+      res
+        .status(404)
+        .json({ message: "Error when trying to save the plugin.", err: err });
+      res.status(404);
+      throw new Error("Error saving plugin.");
+    });
+});
+export const RemoveAllAudioPlugins = asyncHandler(async (req, res) => {
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+  AudioPlugin.deleteMany({})
+    .then((doc) => {
+      res.json(doc);
+    })
+    .catch((err) => {
+      console.log("err", err);
+      res
+        .status(404)
+        .json({ message: "Error when trying to save the plugin.", err: err });
+      res.status(404);
+      throw new Error("Error saving plugin.");
+    });
+});
+
+export const AudioPluginModel = asyncHandler(async (req, res) => {
+  const audioPlugins = await audioPluginSchema;
+
+  res.json({ model: audioPlugins });
+});
+
+////////////////////////////////////////////////////////////////
+///       ADMIN ACCESS
+////////////////////////////////////////////////////////////////
+//getAdminAudioPlugins function to get all plugins for the admin
+export const getAdminAudioPlugins = asyncHandler(async (req, res) => {
+  if (!req.user) res.status(401).json({ message: "Access not authorized" });
+
+  if (!adminList["all-plugins"].includes(req.user._id))
+    res
+      .status(403)
+      .json({ message: "Sorry, you do not have permission to access this." });
+  const collection = "all-plugins";
+  const AudioPlugin = mongoose.model(collection, audioPluginSchema);
+  const audioPlugins = await AudioPlugin.find({});
+  res.json(audioPlugins);
+});
