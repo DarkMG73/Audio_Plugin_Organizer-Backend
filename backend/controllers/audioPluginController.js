@@ -63,6 +63,7 @@ export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
 export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
   console.log("Saving Multiple Plugins");
   const audioPlugin = req.body.theData;
+  console.log("req.body", req.body);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
   if (req.user) {
