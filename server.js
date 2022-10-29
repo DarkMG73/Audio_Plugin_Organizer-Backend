@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import connectDB from "./backend/config/db.js";
 import userRoute from "./backend/routes/userRoute.js";
 // import User from "./backend/models/userModel";
@@ -6,7 +7,6 @@ import audioPluginRoute from "./backend/routes/audioPluginRoute.js";
 import bodyParser from "body-parser";
 import jsonwebtoken from "jsonwebtoken";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 

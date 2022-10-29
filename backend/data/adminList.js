@@ -1,9 +1,6 @@
 const adminList = {
-
-    "all-plugins": ["62dab3175dc945ac000c8495"],
-    "users": ["62dab3175dc945ac000c8495"],
-  
-
+  "all-plugins": ["635b5ec342a112fd3eac0425"],
+  users: ["635b5ec342a112fd3eac0425"],
 };
 
 export default adminList;

@@ -43,20 +43,38 @@ export const sign_in = asyncHandler(async (req, res) => {
           message: "Authentication failed. Invalid user or password.",
         });
       }
-      return res.json({
-        token: jwt.sign(
-          { email: user.email, fullName: user.fullName, _id: user._id },
-          process.env.SECRET,
-          { expiresIn: "1 day" } // The httponly cookie expres in 12 hours, so this would only apply if that cookie is tampered with.
-        ),
+      if (user.isAdmin) {
+        return res.json({
+          token: jwt.sign(
+            { email: user.email, fullName: user.fullName, _id: user._id },
+            process.env.SECRET,
+            { expiresIn: "1 day" } // The httponly cookie expres in 12 hours, so this would only apply if that cookie is tampered with.
+          ),
 
-        firstName: user.firstName,
-        secondName: user.secondName,
-        userName: user.userName,
-        email: user.email,
-        created: user.created,
-        _id: user._id,
-      });
+          firstName: user.firstName,
+          secondName: user.secondName,
+          userName: user.userName,
+          email: user.email,
+          created: user.created,
+          _id: user._id,
+          isAdmin: user.isAdmin,
+        });
+      } else {
+        return res.json({
+          token: jwt.sign(
+            { email: user.email, fullName: user.fullName, _id: user._id },
+            process.env.SECRET,
+            { expiresIn: "1 day" } // The httponly cookie expres in 12 hours, so this would only apply if that cookie is tampered with.
+          ),
+
+          firstName: user.firstName,
+          secondName: user.secondName,
+          userName: user.userName,
+          email: user.email,
+          created: user.created,
+          _id: user._id,
+        });
+      }
     }
   );
 });
