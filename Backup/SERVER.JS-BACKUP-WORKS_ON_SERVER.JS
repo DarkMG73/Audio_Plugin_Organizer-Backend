@@ -23,7 +23,7 @@ dotenv.config();
 // create express app
 const app = express();
 
-// setup route middleware
+// setup route middlewares
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 200, // Limit each IP to 200 requests per `window` (here, per 10 minutes)
@@ -59,18 +59,10 @@ try {
         process.env.SECRET,
         function (err, decode) {
           if (err) {
-            if (process.env.SECRET && process.env.SECRET != "undefined") {
-              console.log(
-                "There is a temporary server issue. Please try your request again. Error: NS-SVR",
-                err
-              );
-              return res.status(403).json({
-                message:
-                  "There is a temporary issue accessing the required security data. Please try your request again. Error: NS-SVR | " +
-                  err,
-              });
-            }
+            console.log("--- JWT ERROR --- ", process.env.SECRET);
             req.user = undefined;
+            res.errorMessage = "--- JWT ERROR --- ";
+            
           }
 
           req.user = decode;
@@ -83,39 +75,29 @@ try {
       next();
     }
   });
-} catch (err) {
-  console.log(
-    "There is a temporary server issue. Please try your request again. Error: TC-SRV",
-    err
-  );
+} catch {
+   
+  console.log("--- CATCH ERROR on SERVER.JS --- ", process.env.SECRET);
 }
+
 
 // app.use(function (req, res) {
 //   res.status(404).send({ url: req.originalUrl + " not found" });
 // });
 
-try {
-  //Creating API for user
-  app.use("/api/users", userRoute);
+//Creating API for user
+app.use("/api/users", userRoute);
 
-  //Creating API for Audio Plugin Info
-  app.use("/api/all-plugins", audioPluginRoute);
+//Creating API for Audio Plugin Info
+app.use("/api/all-plugins", audioPluginRoute);
 
-  //Creating API for admin functions
-  app.use("/api/special-admin/", adminRoute);
-} catch (err) {
-  console.log("There was an error when accessing the route: ", err);
-}
+//Creating API for admin functions
+app.use("/api/special-admin/", adminRoute);
 
 const PORT = process.env.PORT || 31234;
+
 //Express js listen method to run project on http://localhost:8000
-try {
-  app.listen(
-    PORT,
-    console.log(
-      `App is running in ${process.env.NODE_ENV} mode on port ${PORT}`
-    )
-  );
-} catch (err) {
-  console.log("There was an error on the server: ", err);
-}
+app.listen(
+  PORT,
+  console.log(`App is running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+);

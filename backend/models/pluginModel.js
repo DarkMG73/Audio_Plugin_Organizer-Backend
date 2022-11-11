@@ -40,6 +40,9 @@ const audioPluginSchema = mongoose.Schema(
     notes: {
       type: String,
     },
+    identifier: {
+      type: String,
+    },
   },
   {
     timestamps: true,
