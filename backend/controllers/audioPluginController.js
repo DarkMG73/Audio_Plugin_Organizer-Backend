@@ -164,15 +164,14 @@ export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
   const groomedDataObject = groomObjectForDB(dataObj);
   console.log("groomedDataObject", groomedDataObject);
 
-  const identifier = groomedDataObject.identifier;
-  console.log("Update a Plugin -> ", identifier);
-  console.log("identifier", identifier);
-  const filter = { identifier: identifier };
+  const dbID = groomedDataObject.dbID;
+  console.log("Update a Plugin -> ", dbID);
+  const filter = { _id: dbID };
   console.log("_______filter_______", filter);
 
   const audioPlugin = await AudioPlugin.findOne(filter);
   console.log("audioPlugin", audioPlugin);
-  if (audioPlugin.identifier === identifier) {
+  if (audioPlugin._id.toString() === dbID) {
     AudioPlugin.findOneAndUpdate(
       filter,
       { $set: groomedDataObject },

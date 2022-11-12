@@ -43,6 +43,9 @@ const audioPluginSchema = mongoose.Schema(
     identifier: {
       type: String,
     },
+    masterLibraryID: {
+      type: String,
+    },
   },
   {
     timestamps: true,
