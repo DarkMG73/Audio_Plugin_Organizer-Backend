@@ -114,7 +114,8 @@ export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
 
 /// UPDATE A PLUGIN /////////////////////////////
 export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
-  const dataObj = req.body.theDataObj;
+  console.log("req.body", req.body);
+  const dataObj = req.body.dataObj;
   // console.log("req", req);
   console.log("dataObj", dataObj);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);

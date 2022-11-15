@@ -7,7 +7,7 @@ import audioPluginRoute from "./backend/routes/audioPluginRoute.js";
 import bodyParser from "body-parser";
 import jsonwebtoken from "jsonwebtoken";
 import express from "express";
-import cors from "cors";
+
 import cookieParser from "cookie-parser";
 
 /// SECURITY ///
@@ -24,9 +24,12 @@ dotenv.config();
 const app = express();
 
 // setup route middleware
+
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 200, // Limit each IP to 200 requests per `window` (here, per 10 minutes)
+  message:
+    "Too many accounts created from this IP, please try again after an hour",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
@@ -35,11 +38,27 @@ app.use(limiter);
 
 app.use(helmet());
 console.log("Trip through ------->");
+
+const whitelist = [
+  "http://localhost:3000",
+  "https://audio-plugin-organizer.glassinteractive.com/",
+];
 const options = {
-  origin: true,
+  // origin: true,
+  origin: function (origin, callback) {
+    console.log("origin", origin);
+    console.log("whitelist", whitelist);
+    console.log("whitelist.indexOf(origin)", whitelist.indexOf(origin));
+    if (origin === undefined || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  exposedHeaders: ["sessionId"],
   credentials: true,
 };
-app.use(cors(options));
+// app.use(cors(options));
 
 app.set("trust proxy", 1);
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
