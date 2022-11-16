@@ -14,7 +14,6 @@ import express from "express";
 
 const router = express.Router();
 
-console.log("In Audio Routes");
 // express router method to create route for adding an audio plugin
 router.route("/add").post(AddAudioPlugin);
 

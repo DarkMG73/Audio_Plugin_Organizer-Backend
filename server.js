@@ -7,7 +7,7 @@ import audioPluginRoute from "./backend/routes/audioPluginRoute.js";
 import bodyParser from "body-parser";
 import jsonwebtoken from "jsonwebtoken";
 import express from "express";
-
+import cors from "cors";
 import cookieParser from "cookie-parser";
 
 /// SECURITY ///
@@ -25,40 +25,57 @@ const app = express();
 
 // setup route middleware
 
-const limiter = rateLimit({
+const globallimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 200, // Limit each IP to 200 requests per `window` (here, per 10 minutes)
+  max: 1500, // Limit each IP to 200 requests per `window` (here, per 10 minutes)
   message:
     "Too many accounts created from this IP, please try again after an hour",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 // Apply the rate limiting middleware to all requests
-app.use(limiter);
+app.use(globallimiter);
+
+// Set user route limits
+const userLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 50, // Limit each IP to 50 requests per `window` (here, per 10 minutes)
+  message:
+    "Too many user requests from this IP, please try again after an hour",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+// Set user route limits
+const pluginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 1000, // Limit each IP to 100 requests per `window` (here, per 10 minutes)
+  message:
+    "Too many user requests from this IP, please try again after an hour",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 app.use(helmet());
-console.log("Trip through ------->");
+// console.log("Begin ------->");
 
 const whitelist = [
   "http://localhost:3000",
   "https://audio-plugin-organizer.glassinteractive.com/",
 ];
+
 const options = {
   // origin: true,
   origin: function (origin, callback) {
-    console.log("origin", origin);
-    console.log("whitelist", whitelist);
-    console.log("whitelist.indexOf(origin)", whitelist.indexOf(origin));
     if (origin === undefined || whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  exposedHeaders: ["sessionId"],
+  exposedHeaders: "ratelimit-limit, ratelimit-remaining, ratelimit-reset",
   credentials: true,
 };
-// app.use(cors(options));
+app.use(cors(options));
 
 app.set("trust proxy", 1);
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
@@ -77,6 +94,7 @@ try {
         req.headers.authorization.split(" ")[1],
         process.env.SECRET,
         function (err, decode) {
+          console.log("An error of some sort -->", err);
           if (err) {
             if (process.env.SECRET && process.env.SECRET != "undefined") {
               console.log(
@@ -115,13 +133,13 @@ try {
 
 try {
   //Creating API for user
-  app.use("/api/users", userRoute);
+  app.use("/api/users", userLimiter, userRoute);
 
   //Creating API for Audio Plugin Info
-  app.use("/api/all-plugins", audioPluginRoute);
+  app.use("/api/all-plugins", pluginLimiter, audioPluginRoute);
 
   //Creating API for admin functions
-  app.use("/api/special-admin/", adminRoute);
+  app.use("/api/special-admin/", userLimiter, adminRoute);
 } catch (err) {
   console.log("There was an error when accessing the route: ", err);
 }

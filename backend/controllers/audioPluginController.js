@@ -12,7 +12,7 @@ function getAudioPluginModelAndCollection(user) {
 }
 // getAudioPlugins function to get all plugins
 export const getAudioPlugins = asyncHandler(async (req, res) => {
-  console.log("Get all plugins request", req);
+
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const audioPlugins = await AudioPlugin.find({});
   res.json(audioPlugins);
@@ -20,7 +20,6 @@ export const getAudioPlugins = asyncHandler(async (req, res) => {
 
 // getAudioPluginBy_Id function to retrieve user by id
 export const getAudioPluginBy_Id = asyncHandler(async (req, res) => {
-  console.log("GET PLUGIN BY ID -> ", req);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const audioPlugin = await AudioPlugin.findById(req.params.id);
 
@@ -36,13 +35,10 @@ export const getAudioPluginBy_Id = asyncHandler(async (req, res) => {
 // getAudioPluginByHashId function to retrieve user
 // by the Hash id assigned when it was created.
 export const getAudioPluginByHashId = asyncHandler(async (req, res) => {
-  console.log("GET PLUGIN BY HASH ID -> ", req);
+
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const hashId = req.params.hashId;
-  console.log("hashId", hashId);
   const filter = { id: hashId };
-  console.log("_______filter_______", filter);
-
   const audioPlugin = await AudioPlugin.findOne(filter);
 
   //if user id match param id send user else send error
@@ -56,7 +52,6 @@ export const getAudioPluginByHashId = asyncHandler(async (req, res) => {
 
 /// ADD A PLUGIN ////////////////////////////
 export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
-  console.log("Saving A Plugin");
   const audioPlugin = req.body.theData;
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
@@ -83,11 +78,7 @@ export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
 
 /// ADD MANY PLUGINS /////////////////////////////
 export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
-  console.log("Saving Multiple Plugins");
   const audioPlugin = req.body.theData;
-  console.log("audioPlugin", audioPlugin);
-
-  console.log("req.body", req.body);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
   if (req.user) {
@@ -114,12 +105,9 @@ export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
 
 /// UPDATE A PLUGIN /////////////////////////////
 export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
-  console.log("req.body", req.body);
   const dataObj = req.body.dataObj;
-  // console.log("req", req);
-  console.log("dataObj", dataObj);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
-  console.log("AudioPlugin", AudioPlugin);
+
   // Convert strings to numbers where needed
   function groomObjectForDB(dataObj) {
     const requiresNumber = ["rating"];
@@ -146,9 +134,7 @@ export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
 
     for (const key in dataObj) {
       if (requiresNumber.includes(key) && isNaN(dataObj[key])) {
-        console.log("key");
         const newNumber = dataObj[key];
-
         newDataObj[key] = parseFloat(dataObj[key].replace('"', ""));
       } else if (requiresBoolean.includes(key)) {
         if (dataObj[key].constructor === String) {
@@ -163,15 +149,10 @@ export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
   }
 
   const groomedDataObject = groomObjectForDB(dataObj);
-  console.log("groomedDataObject", groomedDataObject);
-
   const dbID = groomedDataObject.dbID;
-  console.log("Update a Plugin -> ", dbID);
   const filter = { _id: dbID };
-  console.log("_______filter_______", filter);
-
   const audioPlugin = await AudioPlugin.findOne(filter);
-  console.log("audioPlugin", audioPlugin);
+
   if (audioPlugin._id.toString() === dbID) {
     AudioPlugin.findOneAndUpdate(
       filter,

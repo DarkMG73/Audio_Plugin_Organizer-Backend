@@ -6,12 +6,10 @@ import asyncHandler from "express-async-handler";
 const appCookieName = "giProductionTool";
 
 export const register = asyncHandler(async (req, res) => {
-  console.log(" --> line:8 req", req.body);
   const user = { ...req.body, isAdmin: false };
   const newUser = new User(user);
 
   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
-  console.log(" --> newUser", newUser);
   newUser.save(function (err, user) {
     if (err) {
       console.log(" --> Resister err", err);
@@ -27,7 +25,6 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 export const sign_in = asyncHandler(async (req, res) => {
-  console.log(" --> sign_in req.body", req.body);
   User.findOne(
     {
       email: req.body.email,
