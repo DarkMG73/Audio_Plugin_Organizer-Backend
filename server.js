@@ -61,11 +61,18 @@ app.use(helmet());
 const whitelist = [
   "http://localhost:3000",
   "https://audio-plugin-organizer.glassinteractive.com/",
+  "https://audio-plugin-organizer.glassinteractive.com",
+  "https://www.audio-plugin-organizer.glassinteractive.com",
+  "https://www.audio-plugin-organizer.glassinteractive.com/",
+  "glassinteractive.com",
 ];
 
 const options = {
   // origin: true,
   origin: function (origin, callback) {
+    console.log("origin", origin);
+    console.log("whitelist", whitelist);
+    console.log("whitelist.indexOf(origin)", whitelist.indexOf(origin));
     if (origin === undefined || whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -74,6 +81,9 @@ const options = {
   },
   exposedHeaders: "ratelimit-limit, ratelimit-remaining, ratelimit-reset",
   credentials: true,
+  methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  maxAge: 3600,
 };
 app.use(cors(options));
 
@@ -84,6 +94,13 @@ app.use(cookieParser());
 
 try {
   app.use(function (req, res, next) {
+    // ****************************************************************
+    // *** FOR DEV ONLY REMOVE FOR PROD ***
+    // ****************************************************************
+    console.log("process.env.SECRET ", process.env.SECRET);
+    console.log("process.env.PORT ", process.env.PORT);
+    console.log("process.env.DOMAIN ", process.env.DOMAIN);
+    // ****************************************************************
     console.log("A request------->");
     if (
       req.headers &&
