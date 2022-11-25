@@ -3,4 +3,4 @@ const adminList = {
   users: ["635b5ec342a112fd3eac0425"],
 };
 
-export default adminList;
+module.exports = adminList;

@@ -1,7 +1,7 @@
-import audioPluginSchema from "../models/pluginModel.js";
-import asyncHandler from "express-async-handler";
-import mongoose from "mongoose";
-import adminList from "../data/adminList.js";
+const audioPluginSchema = require("../models/pluginModel.js");
+const asyncHandler = require("express-async-handler");
+const mongoose = require("mongoose");
+const adminList = require("../data/adminList.js");
 
 function getAudioPluginModelAndCollection(user) {
   let collection = user ? user._id : "all-plugins";
@@ -11,15 +11,14 @@ function getAudioPluginModelAndCollection(user) {
   return mongoose.model(collection, audioPluginSchema);
 }
 // getAudioPlugins function to get all plugins
-export const getAudioPlugins = asyncHandler(async (req, res) => {
-
+module.exports.getAudioPlugins = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const audioPlugins = await AudioPlugin.find({});
   res.json(audioPlugins);
 });
 
 // getAudioPluginBy_Id function to retrieve user by id
-export const getAudioPluginBy_Id = asyncHandler(async (req, res) => {
+module.exports.getAudioPluginBy_Id = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const audioPlugin = await AudioPlugin.findById(req.params.id);
 
@@ -34,8 +33,7 @@ export const getAudioPluginBy_Id = asyncHandler(async (req, res) => {
 
 // getAudioPluginByHashId function to retrieve user
 // by the Hash id assigned when it was created.
-export const getAudioPluginByHashId = asyncHandler(async (req, res) => {
-
+module.exports.getAudioPluginByHashId = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   const hashId = req.params.hashId;
   const filter = { id: hashId };
@@ -51,7 +49,7 @@ export const getAudioPluginByHashId = asyncHandler(async (req, res) => {
 });
 
 /// ADD A PLUGIN ////////////////////////////
-export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
+module.exports.AddAudioPlugin = asyncHandler(async (req, res, next) => {
   const audioPlugin = req.body.theData;
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
@@ -77,7 +75,7 @@ export const AddAudioPlugin = asyncHandler(async (req, res, next) => {
 });
 
 /// ADD MANY PLUGINS /////////////////////////////
-export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
+module.exports.AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
   const audioPlugin = req.body.theData;
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
@@ -104,7 +102,7 @@ export const AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
 });
 
 /// UPDATE A PLUGIN /////////////////////////////
-export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
+module.exports.UpdateAudioPlugin = asyncHandler(async (req, res) => {
   const dataObj = req.body.dataObj;
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
@@ -177,7 +175,7 @@ export const UpdateAudioPlugin = asyncHandler(async (req, res) => {
   }
 });
 
-export const RemoveAudioPlugin = asyncHandler(async (req, res) => {
+module.exports.RemoveAudioPlugin = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
   AudioPlugin.deleteOne({ _id: req.params.id })
@@ -193,7 +191,7 @@ export const RemoveAudioPlugin = asyncHandler(async (req, res) => {
     });
 });
 
-export const RemoveAllAudioPlugins = asyncHandler(async (req, res) => {
+module.exports.RemoveAllAudioPlugins = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
   AudioPlugin.deleteMany({})
     .then((doc) => {
@@ -208,7 +206,7 @@ export const RemoveAllAudioPlugins = asyncHandler(async (req, res) => {
     });
 });
 
-export const AudioPluginModel = asyncHandler(async (req, res) => {
+module.exports.AudioPluginModel = asyncHandler(async (req, res) => {
   const audioPlugins = await audioPluginSchema;
 
   res.json({ model: audioPlugins });
@@ -218,7 +216,7 @@ export const AudioPluginModel = asyncHandler(async (req, res) => {
 ///       ADMIN ACCESS
 ////////////////////////////////////////////////////////////////
 //getAdminAudioPlugins function to get all plugins for the admin
-export const getAdminAudioPlugins = asyncHandler(async (req, res) => {
+module.exports.getAdminAudioPlugins = asyncHandler(async (req, res) => {
   if (!req.user) res.status(401).json({ message: "Access not authorized" });
 
   if (!adminList["all-plugins"].includes(req.user._id))
@@ -232,7 +230,7 @@ export const getAdminAudioPlugins = asyncHandler(async (req, res) => {
 });
 
 // getAudioPlugins function to get all plugins
-export const changeFieldNameInDB = asyncHandler(async (req, res) => {
+module.exports.changeFieldNameInDB = asyncHandler(async (req, res) => {
   console.log("Get all plugins request", req);
   const AudioPlugin = getAudioPluginModelAndCollection();
   console.log("AudioPlugin", AudioPlugin);

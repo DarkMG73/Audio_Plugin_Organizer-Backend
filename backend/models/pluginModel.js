@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const audioPluginSchema = mongoose.Schema(
   {
@@ -52,4 +52,4 @@ const audioPluginSchema = mongoose.Schema(
   }
 );
 
-export default audioPluginSchema;
+module.exports = audioPluginSchema;

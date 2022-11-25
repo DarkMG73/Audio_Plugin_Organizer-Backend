@@ -1,4 +1,4 @@
-import {
+const {
   getAudioPlugins,
   getAudioPluginBy_Id,
   getAudioPluginByHashId,
@@ -9,8 +9,8 @@ import {
   RemoveAllAudioPlugins,
   AudioPluginModel,
   getAdminAudioPlugins,
-} from "../controllers/audioPluginController.js";
-import express from "express";
+} = require("../controllers/audioPluginController.js");
+const express = require("express");
 
 const router = express.Router();
 
@@ -44,4 +44,4 @@ router.route("/:id").get(getAudioPluginBy_Id);
 // express router method to create route for an admin to get all tools
 router.route("/").post(getAudioPlugins);
 
-export default router;
+module.exports =  router;

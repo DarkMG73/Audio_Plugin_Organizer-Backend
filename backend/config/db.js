@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import User from "../models/userModel.js";
-import AudioPlugin from "../models/pluginModel.js";
+const mongoose = require("mongoose");
+const User = require("../models/userModel.js");
+const AudioPlugin = require("../models/pluginModel.js");
 
 const connectDB = async () => {
   try {
@@ -21,4 +21,4 @@ const connectDB = async () => {
   }
 };
 
-export default connectDB;
+module.exports = connectDB;

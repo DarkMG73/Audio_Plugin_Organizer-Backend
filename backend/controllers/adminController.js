@@ -1,5 +1,5 @@
-import download from "image-downloader";
-import path from "path";
+const download = require("image-downloader");
+const path = require("path");
 
 // const options = {
 //   url:
@@ -14,7 +14,7 @@ import path from "path";
 //   })
 //   .catch((err) => console.error(err));
 
-export const downloadPicsFromDbPhotoURL = (req, res) => {
+module.exports.downloadPicsFromDbPhotoURL = (req, res) => {
   // console.log("IN");
   // download
   //   .image(options)

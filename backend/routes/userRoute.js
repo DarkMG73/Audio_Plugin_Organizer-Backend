@@ -1,4 +1,4 @@
-import {
+const {
   getUsers,
   getUserById,
   register,
@@ -8,8 +8,8 @@ import {
   getCookie,
   loginRequired,
   get_user_by_token,
-} from "../controllers/userController.js";
-import express from "express";
+} = require("../controllers/userController.js");
+const express = require("express");
 
 const router = express.Router();
 
@@ -37,4 +37,4 @@ router.route("/:id").get(getUserById);
 // express router method to create route for getting all users
 router.route("/").get(getUsers);
 
-export default router;
+module.exports = router;
