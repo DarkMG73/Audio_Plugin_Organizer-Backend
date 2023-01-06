@@ -60,6 +60,7 @@ app.use(helmet());
 
 const whitelist = [
   "http://localhost:3000",
+  "http://localhost:8000",
   "https://audio-plugin-organizer.glassinteractive.com/",
   "https://audio-plugin-organizer.glassinteractive.com",
   "https://www.audio-plugin-organizer.glassinteractive.com",

@@ -2,8 +2,9 @@ const User = require("../models/userModel.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const asyncHandler = require("express-async-handler");
-
+const path = require("path");
 const appCookieName = "giProductionTool";
+const { sendEmail } = require("../tools/sendEmail");
 
 module.exports.register = asyncHandler(async (req, res) => {
   const user = { ...req.body, isAdmin: false };
@@ -177,3 +178,250 @@ module.exports.getUserById = asyncHandler(async (req, res) => {
     res.status(404);
   }
 });
+
+////////////////////////////////
+/// Send Forgotten Password HTML
+////////////////////////////////
+exports.render_forgot_password_template = function (req, res) {
+  const thePath = path.resolve("./public/forgot-password.html");
+
+  return res
+    .set(
+      "Content-Security-Policy",
+      "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'"
+    )
+    .set("X-Frame-Options", "")
+    .sendFile(path.resolve("./public/forgot-password.html"));
+};
+
+////////////////////////////////
+/// Send Reset Password HTML
+////////////////////////////////
+exports.render_reset_password_template = function (req, res) {
+  return res
+    .set(
+      "Content-Security-Policy",
+      "default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'"
+    )
+    .sendFile(path.resolve("./public/reset-password.html"));
+};
+
+////////////////////////////////
+/// Forgot Password POST Route
+////////////////////////////////
+exports.forgot_password = function (req, res) {
+  console.log(" --> forgot_password req.body", req.body);
+
+  User.findOne(
+    {
+      email: req.body.email,
+    },
+    function (err, user) {
+      console.log(" --> Found User", user);
+      if (err) {
+        console.log(" --> 1 forgot_password Find User Error", err);
+        return res.status(401).json({
+          message: "There was a problem with authentication: " + err,
+        });
+      }
+      if (!user) {
+        console.log(
+          " --> 2 forgot_password There was a problem with authentication: User " +
+            req.body.email +
+            " was not found."
+        );
+        return res.status(401).json({
+          message:
+            "There was a problem with authentication: User " +
+            req.body.email +
+            ' was not found. Please fix the email address or, if you are not signed up yet, use the "Sign Up" button to get started.',
+        });
+      }
+      console.log(" --> Confirming and Sending Email");
+
+      try {
+        if (process.env.SECRET && process.env.SECRET != "undefined") {
+          const JWTToken = jwt.sign(
+            {
+              email: user.email,
+              fullName: user.fullName,
+              _id: user._id,
+              passwordReset: true,
+            },
+            process.env.SECRET,
+            // TODO: SE THIS TO 10 MINUTES *********
+            { expiresIn: "1000 minutes" } // The httpOnly cookie expires in 10 minutes, so this would only apply if that cookie is tampered with.
+          );
+
+          const mailOptions = {
+            from: process.env.MAILER_EMAIL_ID,
+            to: user.email,
+            template: "forgot-password-email",
+            subject: "interview Questions Tool Reset Request",
+            text: "That was easy!",
+            context: {
+              url:
+                process.env.DOMAIN +
+                "api/users/auth/reset_password?token=" +
+                JWTToken,
+              name: "Mike",
+            },
+          };
+
+          sendEmail(mailOptions)
+            .then((emailResponse) => {
+              console.log("res", emailResponse);
+              return res.status(250).json({
+                message: "The email was sent!",
+              });
+            })
+            .catch((err) => {
+              console.log("Send email error: ", err);
+              return res.status(403).json({
+                message:
+                  "There is an issue trying to send the email. Please try your request again. Error: EM-UC-1",
+              });
+            });
+        } else {
+          console.log(
+            "There is a temporary server issue. Please try your request again. Error: NS-UC 2"
+          );
+          return res.status(403).json({
+            message:
+              "There is a temporary issue accessing the required security data. Please try your request again. Error: NS-UC-2",
+          });
+        }
+      } catch (err) {
+        console.log(
+          "There is a temporary server issue. Please try your request again. Error: NS | ",
+          err
+        );
+        return res.status(500).json({
+          message:
+            "There is a temporary issue running part of the program on the server. Please try your request again and contact the website admin if the problem persists. Error: TC-UC | " +
+            err,
+        });
+      }
+    }
+  );
+};
+
+/////////////////////////////////////////
+/// Reset password POST Route
+/////////////////////////////////////////
+exports.reset_password = async (req, res, next) => {
+  const { newPassword, verifyPassword, token } = req.body;
+  const passwordValidator = usePasswordValidator();
+
+  const passwordValidCheck = passwordValidator(newPassword, true);
+
+  if (!passwordValidCheck.isValid) {
+    if (process.env.NODE_ENV === "development")
+      console.log("--> passwordTestResults", passwordValidCheck);
+    res.status(412).json({
+      valid: false,
+      message: `The password does not meet the requirements. It failed with these errors:\n\n${passwordValidCheck.details
+        .map((error, i) => {
+          const groomedMessage = error.message
+            .replace("string", "password")
+            .replace("digit", "number");
+          return "   " + (i + 1) + ": " + groomedMessage + ". ";
+        })
+        .join(
+          "\n"
+        )}\n\nHere are all of the password requirements: ${passwordRequirements}`,
+    });
+  } else {
+    if (newPassword === verifyPassword) {
+      let tokenData = null;
+      try {
+        tokenData = jsonwebtoken.verify(token, process.env.SECRET);
+      } catch (err) {
+        if (process.env.SECRET && process.env.SECRET != "undefined") {
+          console.log(
+            "<><><> There is a temporary server issue. Please try your request again. Error: NS-UC1",
+            err
+          );
+          res.status(403).json({
+            message:
+              "There is a temporary issue accessing the required security data. Please try your request again. Error: NS-UC2 | " +
+              err,
+          });
+        } else {
+          console.log(
+            "<><><> There is an issue with the JWT. Error: JWT-UC1",
+            err
+          );
+          res.status(401).json({
+            message:
+              "There is a temporary issue accessing the required security data. Please try your request again. Error: JWT-UC1 | " +
+              err,
+          });
+        }
+      }
+
+      if (tokenData.passwordReset) {
+        const groomedNewPasswordData = {
+          hash_password: bcrypt.hashSync(newPassword, 10),
+        };
+
+        const filter = { email: tokenData.email };
+        const user = await User.findOne(filter);
+        console.log("<><><> FOUND USER ->", user);
+
+        const updateResults = await updateUserHistoryLocalFunction(
+          groomedNewPasswordData,
+          user
+        );
+
+        console.log("<><><> updateResults: ", updateResults);
+
+        if (updateResults.status < 400) {
+          console.log(
+            "<><><> updateResults.status < 400",
+            updateResults.status < 400
+          );
+
+          if (
+            groomedNewPasswordData.hash_password ===
+            updateResults.data.doc.hash_password
+          ) {
+            res.status(200).json({
+              message: updateResults.data.message,
+              data: updateResults.data,
+            });
+          } else {
+            updateResults.data.message = "error";
+            res.status(403).json({
+              message:
+                "A problem occurred and the password was not able to be reset. Please contact teh site administrator for further assistance.",
+              data: updateResults.data,
+            });
+          }
+        }
+        if (updateResults.status >= 400) {
+          console.log("err", updateResults);
+          res.status(404).json({
+            message: "Error when trying to save the user history.",
+            err: updateResults.data.message,
+          });
+        }
+      } else {
+        res.json({
+          message:
+            "Password reset is not allowed in this case. If you need to reset your password, please contact this site administrator.",
+        });
+      }
+      next();
+    } else {
+      console.log("Passwords do not match", newPassword, verifyPassword);
+      res.status(412).json({
+        message:
+          "The two passwords do not match. please ensure they are identical.",
+      });
+      next();
+    }
+  }
+
+  next();
+};
