@@ -66,6 +66,7 @@ const whitelist = [
   "https://www.audio-plugin-organizer.glassinteractive.com",
   "https://www.audio-plugin-organizer.glassinteractive.com/",
   "glassinteractive.com",
+  "https://api-organizer.glassinteractive.com/",
 ];
 
 const options = {

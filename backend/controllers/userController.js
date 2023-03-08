@@ -5,6 +5,10 @@ const asyncHandler = require("express-async-handler");
 const path = require("path");
 const appCookieName = "giProductionTool";
 const { sendEmail } = require("../tools/sendEmail");
+const {
+  usePasswordValidator,
+  passwordRequirements,
+} = require("../tools/usePasswordValidator");
 
 module.exports.register = asyncHandler(async (req, res) => {
   const user = { ...req.body, isAdmin: false };
@@ -179,6 +183,39 @@ module.exports.getUserById = asyncHandler(async (req, res) => {
   }
 });
 
+////////////////////////////////////
+// Update User History - Local Use
+///////////////////////////////////
+const updateUserHistoryLocalFunction = async (dataObj, requestedUser) => {
+  let output = {};
+  console.log("Updating User History Local");
+  console.log("dataObj", dataObj);
+  const filter = { _id: requestedUser._id };
+  const user = await User.findOne(filter);
+  console.log("user", user);
+
+  if (user._id.toString() === requestedUser._id.toString()) {
+    output = await User.findOneAndUpdate(filter, dataObj, { new: true });
+    if (output) {
+      console.log("Success: ", output);
+      output = { status: 200, data: { message: "Success!", doc: output } };
+    } else {
+      console.log("err", output);
+      output = {
+        status: 404,
+        data: {
+          message: "Error when trying to save the user history.",
+          err: err,
+        },
+      };
+    }
+  } else {
+    callback({ status: 404, data: { message: "User not found" } });
+    output = { status: 404, data: { message: "User not found" } };
+  }
+  return output;
+};
+
 ////////////////////////////////
 /// Send Forgotten Password HTML
 ////////////////////////////////
@@ -249,10 +286,14 @@ exports.forgot_password = function (req, res) {
               passwordReset: true,
             },
             process.env.SECRET,
-            // TODO: SE THIS TO 10 MINUTES *********
-            { expiresIn: "1000 minutes" } // The httpOnly cookie expires in 10 minutes, so this would only apply if that cookie is tampered with.
+
+            { expiresIn: "10 minutes" } // The httpOnly cookie expires in 10 minutes, so this would only apply if that cookie is tampered with.
           );
 
+          let domain = process.env.DOMAIN;
+          console.log("process.env.NODE_ENV --->", process.env.NODE_ENV);
+          if (process.env.NODE_ENV === "development")
+            domain = "http://localhost:8000/";
           const mailOptions = {
             from: process.env.MAILER_EMAIL_ID,
             to: user.email,
@@ -260,10 +301,7 @@ exports.forgot_password = function (req, res) {
             subject: "interview Questions Tool Reset Request",
             text: "That was easy!",
             context: {
-              url:
-                process.env.DOMAIN +
-                "api/users/auth/reset_password?token=" +
-                JWTToken,
+              url: domain + "api/users/auth/reset_password?token=" + JWTToken,
               name: "Mike",
             },
           };
@@ -335,7 +373,7 @@ exports.reset_password = async (req, res, next) => {
     if (newPassword === verifyPassword) {
       let tokenData = null;
       try {
-        tokenData = jsonwebtoken.verify(token, process.env.SECRET);
+        tokenData = jwt.verify(token, process.env.SECRET);
       } catch (err) {
         if (process.env.SECRET && process.env.SECRET != "undefined") {
           console.log(
