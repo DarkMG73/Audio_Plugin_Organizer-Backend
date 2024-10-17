@@ -19,7 +19,7 @@ module.exports.sendEmail = function (mailOptionsObj) {
       : "An email from GlassInteractive.com",
     text: mailOptionsObj.hasOwnProperty("text")
       ? mailOptionsObj.text
-      : "Hello from https://interview-questions.glassinteractive.com ! This email was sent without any text. Please let the site admin know at general@glassinteractive.com so this can be fixed.",
+      : "Hello from https://audio-plugin-organizer-tool.glassinteractive.com ! This email was sent without any text. Please let the site admin know at general@glassinteractive.com so this can be fixed.",
     context: {
       url:
         mailOptionsObj.hasOwnProperty("context") &&
@@ -41,7 +41,7 @@ module.exports.sendEmail = function (mailOptionsObj) {
 
     console.log("sendEmail: Begin email sending...");
     const transporter = nodemailer.createTransport({
-      host: "mi3-ts5.a2hosting.com",
+      host: "mail.glassinteractive.com",
       port: 465,
       secure: true, // use TLS/ upgrade later with STARTTLS
       auth: {

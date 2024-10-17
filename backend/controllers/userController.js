@@ -14,6 +14,7 @@ module.exports.register = asyncHandler(async (req, res) => {
   const user = { ...req.body, isAdmin: false };
   const newUser = new User(user);
 
+
   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
   newUser.save(function (err, user) {
     if (err) {
@@ -42,7 +43,11 @@ module.exports.sign_in = asyncHandler(async (req, res) => {
         });
       }
       console.log(" --> sign_in user", user);
+    
+
+            
       if (!user || !user.comparePassword(req.body.password)) {
+        
         return res.status(401).json({
           message: "Authentication failed. Invalid user or password.",
         });
@@ -291,6 +296,7 @@ exports.forgot_password = function (req, res) {
           );
 
           let domain = process.env.DOMAIN;
+          console.log('%c⚪️►►►► %cline:298%cdomain', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(178, 190, 126);padding:3px;border-radius:2px', domain)
           console.log("process.env.NODE_ENV --->", process.env.NODE_ENV);
           if (process.env.NODE_ENV === "development")
             domain = "http://localhost:8000/";
@@ -298,7 +304,7 @@ exports.forgot_password = function (req, res) {
             from: process.env.MAILER_EMAIL_ID,
             to: user.email,
             template: "forgot-password-email",
-            subject: "interview Questions Tool Reset Request",
+            subject: "Audio Plugin Tool Reset Request",
             text: "That was easy!",
             context: {
               url: domain + "api/users/auth/reset_password?token=" + JWTToken,

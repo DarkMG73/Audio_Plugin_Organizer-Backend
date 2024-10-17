@@ -1,20 +1,22 @@
 {
     "workbench.colorCustomizations": {
-        "editor.selectionBackground": "#c77f6373",
-        "editor.selectionHighlightBackground": "#ebfc0010",
-        "editor.wordHighlightBackground": "#00ff40",
-        "editorCursor.foreground": "#e5ff00",
-        "editorBracketHighlight.foreground1": "#B48EAD",
+        "editor.selectionBackground": "#ffff0067",
+        "editor.selectionHighlightBackground": "#00f7ff43",
+        "editor.wordHighlightBackground": "#ebfc00ea",
+        "editor.findMatchBackground": "#8c00ff79",
+        "editor.findMatchHighlightBackground": "#8c00ff32",
+        "editorCursor.foreground": "#ff8000",
+        "editorBracketHighlight.foreground1": "#000000",
         "editorBracketHighlight.foreground2": "#A3BE8C",
         "editorBracketHighlight.foreground3": "#EBCB8B",
         "editorBracketHighlight.foreground4": "#D08770",
         "editorBracketHighlight.foreground5": "#BF616A",
         "editorBracketHighlight.foreground6": "#abb2c0",
         "editorBracketHighlight.unexpectedBracket.foreground": "#db6165",
-        "editor.lineHighlightBackground": "#1073cf2d",
-        "editor.lineHighlightBorder": "#9fced11f",
-        "activityBar.background": "#063429",
-        "titleBar.activeBackground": "#094939",
-        "titleBar.activeForeground": "#EFFDFA"
+        "editor.lineHighlightBackground": "#9fced10c",
+        "editor.lineHighlightBorder": "#a910cf12",
+        "activityBar.background": "#531C05",
+        "titleBar.activeBackground": "#742806",
+        "titleBar.activeForeground": "#FFFAF7"
     }
 }
