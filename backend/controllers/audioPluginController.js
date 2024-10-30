@@ -2,6 +2,7 @@ const audioPluginSchema = require("../models/pluginModel.js");
 const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const adminList = require("../data/adminList.js");
+const fs = require('fs');
 
 function getAudioPluginModelAndCollection(user) {
   let collection = user ? user._id : "all-plugins";
@@ -211,6 +212,33 @@ module.exports.AudioPluginModel = asyncHandler(async (req, res) => {
 
   res.json({ model: audioPlugins });
 });
+
+
+// _________________________________
+// getAudioPlugins function to get all plugins
+module.exports.getAllLocalAudioPlugins = asyncHandler(async (req, res) => {
+
+  const directoryPath = '/Library/Audio/Plug-Ins/VST3'; // Replace with the actual directory path
+ 
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        console.error('Error reading directory:', err);
+        return;
+      }
+
+      console.log('Files in directory:', files);
+        res.json(files);
+    });
+
+
+});
+
+
+
+
+// _________________________________
+
+
 
 ////////////////////////////////////////////////////////////////
 ///       ADMIN ACCESS

@@ -9,6 +9,7 @@ const {
   RemoveAllAudioPlugins,
   AudioPluginModel,
   getAdminAudioPlugins,
+  getAllLocalAudioPlugins
 } = require("../controllers/audioPluginController.js");
 const express = require("express");
 
@@ -31,6 +32,9 @@ router.route("/update").post(UpdateAudioPlugin);
 
 // express router method to create route for updating an audio plugin
 router.route("/model").get(AudioPluginModel);
+
+// express router method to create route for getting all local  audio plugins
+router.route("/get-local-plugins").get(getAllLocalAudioPlugins);
 
 // express router method to create route for getting all audio tools
 router.route("/admin/allAudioTools").get(getAdminAudioPlugins);
