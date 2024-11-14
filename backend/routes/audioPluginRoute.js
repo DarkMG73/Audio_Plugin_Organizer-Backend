@@ -1,15 +1,15 @@
 const {
-  getAudioPlugins,
-  getAudioPluginBy_Id,
-  getAudioPluginByHashId,
-  AddAudioPlugin,
-  AddManyAudioPlugins,
-  UpdateAudioPlugin,
-  RemoveAudioPlugin,
-  RemoveAllAudioPlugins,
-  AudioPluginModel,
-  getAdminAudioPlugins,
-  getAllLocalAudioPlugins
+   getAudioPlugins,
+   getAudioPluginBy_Id,
+   getAudioPluginByHashId,
+   AddAudioPlugin,
+   AddManyAudioPlugins,
+   UpdateAudioPlugin,
+   RemoveAudioPlugin,
+   RemoveAllAudioPlugins,
+   AudioPluginModel,
+   getAdminAudioPlugins,
+   getAllLocalAudioPlugins
 } = require("../controllers/audioPluginController.js");
 const express = require("express");
 
@@ -48,4 +48,4 @@ router.route("/:id").get(getAudioPluginBy_Id);
 // express router method to create route for an admin to get all tools
 router.route("/").post(getAudioPlugins);
 
-module.exports =  router;
+module.exports = router;
