@@ -10,9 +10,11 @@ function getAudioPluginModelAndCollection(user) {
   }
   return mongoose.model(collection, audioPluginSchema);
 }
+
 // getAudioPlugins function to get all plugins
 module.exports.getAudioPlugins = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+  console.log('AudioPlugin', AudioPlugin)
   const audioPlugins = await AudioPlugin.find({});
   res.json(audioPlugins);
 });
