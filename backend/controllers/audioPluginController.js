@@ -14,7 +14,7 @@ function getAudioPluginModelAndCollection(user) {
 // getAudioPlugins function to get all plugins
 module.exports.getAudioPlugins = asyncHandler(async (req, res) => {
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
-  console.log('AudioPlugin', AudioPlugin)
+  console.log("AudioPlugin", AudioPlugin);
   const audioPlugins = await AudioPlugin.find({});
   res.json(audioPlugins);
 });
@@ -248,3 +248,5 @@ module.exports.changeFieldNameInDB = asyncHandler(async (req, res) => {
 });
 
 // changeFieldNameInDB();
+
+// admin@glassinteractive.com
