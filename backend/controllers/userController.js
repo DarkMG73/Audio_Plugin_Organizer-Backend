@@ -10,10 +10,43 @@ const {
   passwordRequirements,
 } = require("../tools/usePasswordValidator");
 
+const userProps = (user) => {
+  console.log(
+    "%c⚪️►►►► %cline:13%cuser",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(60, 79, 57);padding:3px;border-radius:2px",
+    Object.keys(user)
+  );
+  console.log(
+    "%c⚪️►►►► %cline:21%cuser.pluginPaths",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(118, 77, 57);padding:3px;border-radius:2px",
+    user.pluginPaths
+  );
+  console.log(
+    "%c⚪️►►►► %cline:21%cuser.pluginPaths",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(118, 77, 57);padding:3px;border-radius:2px",
+    user.firstName
+  );
+  return {
+    firstName: user.firstName,
+    secondName: user.secondName,
+    userName: user.userName,
+    email: user.email,
+    created: user.created,
+    pluginPaths: user.pluginPaths,
+    ignoredPlugins: user.ignoredPlugins,
+    _id: user._id,
+  };
+};
+
 module.exports.register = asyncHandler(async (req, res) => {
   const user = { ...req.body, isAdmin: false };
   const newUser = new User(user);
-
 
   newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
   newUser.save(function (err, user) {
@@ -43,33 +76,41 @@ module.exports.sign_in = asyncHandler(async (req, res) => {
         });
       }
       console.log(" --> sign_in user", user);
-    
 
-            
       if (!user || !user.comparePassword(req.body.password)) {
-        
         return res.status(401).json({
           message: "Authentication failed. Invalid user or password.",
         });
       }
       try {
+        console.log(
+          "%c⚪️►►►► %cline:65%cuser",
+          "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+          "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+          "color:#fff;background:rgb(89, 61, 67);padding:3px;border-radius:2px",
+          user
+        );
         if (user.isAdmin) {
           if (process.env.SECRET && process.env.SECRET != "undefined") {
-            return res.json({
+            const outputObj = {
               token: jwt.sign(
                 { email: user.email, fullName: user.fullName, _id: user._id },
                 process.env.SECRET,
                 { expiresIn: "1 day" } // The httpOnly cookie express in 12 hours, so this would only apply if that cookie is tampered with.
               ),
 
-              firstName: user.firstName,
-              secondName: user.secondName,
-              userName: user.userName,
-              email: user.email,
-              created: user.created,
-              _id: user._id,
-              isAdmin: user.isAdmin,
-            });
+              // ._doc required for getting at the document only when passing the Mongoose response.
+              ...userProps(user._doc),
+            };
+
+            console.log(
+              "%c⚪️►►►► %cline:95%coutputObj",
+              "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+              "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+              "color:#fff;background:rgb(38, 157, 128);padding:3px;border-radius:2px",
+              outputObj
+            );
+            return res.json(outputObj);
           } else {
             console.log(
               "There is a temporary server issue. Please try your request again. Error: NS-UC-1"
@@ -88,12 +129,8 @@ module.exports.sign_in = asyncHandler(async (req, res) => {
                 { expiresIn: "1 day" } // The httpOnly cookie expires in 12 hours, so this would only apply if that cookie is tampered with.
               ),
 
-              firstName: user.firstName,
-              secondName: user.secondName,
-              userName: user.userName,
-              email: user.email,
-              created: user.created,
-              _id: user._id,
+              // ._doc required for getting at the document only when passing the Mongoose response.
+              ...userProps(user._doc),
             });
           } else {
             console.log(
@@ -157,8 +194,83 @@ module.exports.get_user_by_token = asyncHandler(async (req, res, next) => {
   if (req.user && req.user._id) {
     const user = await User.findById(req.user._id);
     user.hash_password = undefined;
-    res.status(200).json(user);
-    next();
+    console.log(
+      "%c⚪️►►►► %cline:166%cuser",
+      "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+      "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+      "color:#fff;background:rgb(38, 157, 128);padding:3px;border-radius:2px",
+      user
+    );
+    console.log(
+      "%c⚪️►►►► %cline:193%cuser.isAdmin",
+      "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+      "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+      "color:#fff;background:rgb(20, 68, 106);padding:3px;border-radius:2px",
+      user.isAdmin
+    );
+    if (user.isAdmin) {
+      console.log(
+        "%c⚪️►►►► %cline:166%cuser",
+        "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+        "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+        "color:#fff;background:rgb(38, 157, 128);padding:3px;border-radius:2px",
+        user
+      );
+      console.log(
+        "%c⚪️►►►► %cline:171%c..userProps(user)",
+        "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+        "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+        "color:#fff;background:rgb(39, 72, 98);padding:3px;border-radius:2px",
+        {
+          // ._doc required for getting at the document only when passing the Mongoose response.
+          ...userProps(user._doc),
+        }
+      );
+      if (process.env.SECRET && process.env.SECRET != "undefined") {
+        const outputObj = {
+          token: req.user._id,
+          isAdmin: user.isAdmin,
+          // ._doc required for getting at the document only when passing the Mongoose response.
+          ...userProps(user._doc),
+        };
+        console.log(
+          "%c⚪️►►►► %cline:230%coutputObj",
+          "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+          "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+          "color:#fff;background:rgb(114, 83, 52);padding:3px;border-radius:2px",
+          outputObj
+        );
+        res.status(200).json(outputObj);
+      } else {
+        console.log(
+          "There is a temporary server issue. Please try your request again. Error: NS-UC-1"
+        );
+        res.status(403).json({
+          message:
+            "There is a temporary issue accessing the required security data. Please try your request again. Error: NS-UC-1",
+        });
+      }
+    } else {
+      if (process.env.SECRET && process.env.SECRET != "undefined") {
+        res.status(200).json({
+          token: req.user._id,
+
+          // ._doc required for getting at the document only when passing the Mongoose response.
+          ...userProps(user._doc),
+        });
+      } else {
+        console.log(
+          "There is a temporary server issue. Please try your request again. Error: NS-UC 2"
+        );
+        return res.status(403).json({
+          message:
+            "There is a temporary issue accessing the required security data. Please try your request again. Error: NS-UC-2",
+        });
+      }
+    }
+
+    // res.status(200).json(user);
+    // next();
   } else {
     res.status(401).json({ message: "Unauthorized user 2!!" });
   }
@@ -296,7 +408,13 @@ exports.forgot_password = function (req, res) {
           );
 
           let domain = process.env.DOMAIN;
-          console.log('%c⚪️►►►► %cline:298%cdomain', 'color:#fff;background:#ee6f57;padding:3px;border-radius:2px', 'color:#fff;background:#1f3c88;padding:3px;border-radius:2px', 'color:#fff;background:rgb(178, 190, 126);padding:3px;border-radius:2px', domain)
+          console.log(
+            "%c⚪️►►►► %cline:298%cdomain",
+            "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+            "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+            "color:#fff;background:rgb(178, 190, 126);padding:3px;border-radius:2px",
+            domain
+          );
           console.log("process.env.NODE_ENV --->", process.env.NODE_ENV);
           if (process.env.NODE_ENV === "development")
             domain = "http://localhost:8000/";
