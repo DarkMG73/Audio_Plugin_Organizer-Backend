@@ -5,14 +5,19 @@ const {
   AddAudioPlugin,
   AddManyAudioPlugins,
   UpdateAudioPlugin,
+  UpdateManyAudioPlugins,
   RemoveAudioPlugin,
   RemoveAllAudioPlugins,
   AudioPluginModel,
   getAdminAudioPlugins,
+  getAllLocalAudioPlugins,
 } = require("../controllers/audioPluginController.js");
 const express = require("express");
 
 const router = express.Router();
+
+// TODO: FOR DEV TESTING ONLY express router method to create route for getting all local  audio plugins
+router.route("/get-local-plugins").get(getAllLocalAudioPlugins);
 
 // express router method to create route for adding an audio plugin
 router.route("/add").post(AddAudioPlugin);
@@ -30,6 +35,9 @@ router.route("/:id/delete").get(RemoveAudioPlugin);
 router.route("/update").post(UpdateAudioPlugin);
 
 // express router method to create route for updating an audio plugin
+router.route("/update-many").post(UpdateManyAudioPlugins);
+
+// express router method to create route for updating an audio plugin
 router.route("/model").get(AudioPluginModel);
 
 // express router method to create route for getting all audio tools
@@ -44,4 +52,4 @@ router.route("/:id").get(getAudioPluginBy_Id);
 // express router method to create route for an admin to get all tools
 router.route("/").post(getAudioPlugins);
 
-module.exports =  router;
+module.exports = router;

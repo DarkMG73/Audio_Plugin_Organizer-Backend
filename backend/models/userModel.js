@@ -21,6 +21,21 @@ const userSchema = mongoose.Schema(
       trim: true,
       required: true,
     },
+    pluginPaths: {
+      type: Object,
+      lowercase: true,
+      trim: true,
+    },
+    ignoredPlugins: {
+      type: Array,
+      lowercase: true,
+      trim: true,
+    },
+    missingIgnoredPlugins: {
+      type: Array,
+      lowercase: true,
+      trim: true,
+    },
     hash_password: {
       type: String,
     },

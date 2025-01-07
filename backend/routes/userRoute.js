@@ -12,6 +12,9 @@ const {
   render_reset_password_template,
   forgot_password,
   reset_password,
+  updateIgnoredPlugins,
+  updateMissingIgnoredPlugins,
+  updateUserPluginPaths,
 } = require("../controllers/userController.js");
 const express = require("express");
 
@@ -46,6 +49,17 @@ router.route("/auth/getCookie").get(getCookie);
 
 // express router method to create route for getting all users
 router.route("/auth/get_user_by_token").get(loginRequired, get_user_by_token);
+
+// express router method to update the local locations of plugins
+router.route("/auth/update-plugin-paths").post(updateUserPluginPaths);
+
+// express router method to create route for updating ignored plugins
+router.route("/auth/update-ignored-plugins").post(updateIgnoredPlugins);
+
+// express router method to create route for updating missing ignored plugins
+router
+  .route("/auth/update-missing-ignored-plugins")
+  .post(updateMissingIgnoredPlugins);
 
 // express router method to create route for getting users by id
 router.route("/:id").get(getUserById);

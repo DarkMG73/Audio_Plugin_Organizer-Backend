@@ -11,27 +11,6 @@ const {
 } = require("../tools/usePasswordValidator");
 
 const userProps = (user) => {
-  console.log(
-    "%c⚪️►►►► %cline:13%cuser",
-    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
-    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
-    "color:#fff;background:rgb(60, 79, 57);padding:3px;border-radius:2px",
-    Object.keys(user)
-  );
-  console.log(
-    "%c⚪️►►►► %cline:21%cuser.pluginPaths",
-    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
-    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
-    "color:#fff;background:rgb(118, 77, 57);padding:3px;border-radius:2px",
-    user.pluginPaths
-  );
-  console.log(
-    "%c⚪️►►►► %cline:21%cuser.pluginPaths",
-    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
-    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
-    "color:#fff;background:rgb(118, 77, 57);padding:3px;border-radius:2px",
-    user.firstName
-  );
   return {
     firstName: user.firstName,
     secondName: user.secondName,
@@ -40,6 +19,7 @@ const userProps = (user) => {
     created: user.created,
     pluginPaths: user.pluginPaths,
     ignoredPlugins: user.ignoredPlugins,
+    missingIgnoredPlugins: user.missingIgnoredPlugins,
     _id: user._id,
   };
 };
@@ -294,6 +274,120 @@ module.exports.getUserById = asyncHandler(async (req, res) => {
   if (user) {
     user.hash_password = undefined;
     res.json(user);
+  } else {
+    res.status(404).json({ message: "User not found" });
+    res.status(404);
+  }
+});
+
+///////////////////////////////////
+// Update User Plugin Paths
+///////////////////////////////////
+module.exports.updateUserPluginPaths = asyncHandler(async (req, res) => {
+  console.log("updateUserPluginPaths ---------", req.user);
+  const userPluginPaths = req.body.dataObj;
+  console.log("userPluginPaths", userPluginPaths);
+  const filter = { _id: req.user._id };
+  const user = await User.findOne(filter);
+  console.log("user", user);
+
+  if (user._id.toString() === req.user._id) {
+    User.findOneAndUpdate(
+      filter,
+      {
+        pluginPaths: userPluginPaths,
+      },
+      { new: false }
+    )
+      .then((doc) => {
+        console.log("doc", doc.email);
+        res.status(200).json({ message: "It worked.", doc: doc });
+        res.status(200);
+      })
+      .catch((err) => {
+        console.log("err", err);
+        res.status(404).json({
+          message: "Error when trying to save the user history.",
+          err: err,
+        });
+        res.status(404);
+      });
+  } else {
+    res.status(404).json({ message: "User not found" });
+    res.status(404);
+  }
+});
+
+///////////////////////////////////
+// Update Ignored Plugins
+///////////////////////////////////
+module.exports.updateIgnoredPlugins = asyncHandler(async (req, res) => {
+  console.log("updateIgnoredPlugins ---------", req.user);
+  const ignoredPlugins = req.body.dataArray;
+  console.log("ignoredPlugins", ignoredPlugins);
+  const filter = { _id: req.user._id };
+  const user = await User.findOne(filter);
+  console.log("user", user);
+
+  if (user._id.toString() === req.user._id) {
+    User.findOneAndUpdate(
+      filter,
+      {
+        ignoredPlugins: ignoredPlugins,
+      },
+      { new: false }
+    )
+      .then((doc) => {
+        console.log("doc", doc.email);
+        res.status(200).json({ message: "It worked.", doc: doc });
+        res.status(200);
+      })
+      .catch((err) => {
+        console.log("err", err);
+        res.status(404).json({
+          message: "Error when trying to save the user history.",
+          err: err,
+        });
+        res.status(404);
+      });
+  } else {
+    res.status(404).json({ message: "User not found" });
+    res.status(404);
+  }
+});
+
+///////////////////////////////////
+// Update Missing Ignored Plugins
+///////////////////////////////////
+module.exports.updateMissingIgnoredPlugins = asyncHandler(async (req, res) => {
+  console.log("updateIgnoredPlugins ---------", req.user);
+  const ignoredPlugins = req.body.dataArray;
+  console.log("ignoredPlugins", ignoredPlugins);
+  const filter = { _id: req.user._id };
+  const user = await User.findOne(filter);
+  console.log("user", user);
+
+  if (user._id.toString() === req.user._id) {
+    User.findOneAndUpdate(
+      filter,
+      {
+        missingIgnoredPlugins: ignoredPlugins,
+      },
+      { new: false }
+    )
+      .then((doc) => {
+        console.log("doc", doc.email);
+        res.status(200).json({ message: "It worked.", doc: doc });
+        res.status(200);
+      })
+      .catch((err) => {
+        console.log("err", err);
+        res.status(404).json({
+          message: "Error when trying to update the user history.",
+          err: err,
+        });
+        res.status(404);
+      });
   } else {
     res.status(404).json({ message: "User not found" });
     res.status(404);

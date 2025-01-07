@@ -2,6 +2,7 @@ const audioPluginSchema = require("../models/pluginModel.js");
 const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const adminList = require("../data/adminList.js");
+const fs = require("fs");
 
 function getAudioPluginModelAndCollection(user) {
   let collection = user ? user._id : "all-plugins";
@@ -10,6 +11,32 @@ function getAudioPluginModelAndCollection(user) {
   }
   return mongoose.model(collection, audioPluginSchema);
 }
+
+// TODO: FOR DEV TESTING ONLY *** getAudioPlugins function to get all plugins
+module.exports.getAllLocalAudioPlugins = asyncHandler(async (req, res) => {
+  const pluginPathsObj = req.query;
+  const pluginPathsArray = Object.values(pluginPathsObj);
+  console.log("pluginPathsArray", pluginPathsArray);
+
+  const allFileNamesSet = new Set();
+  for (const directoryPath of Object.values(pluginPathsObj)) {
+    if (!directoryPath) continue;
+    console.log("directoryPath", directoryPath);
+
+    try {
+      const files = await fs.promises.readdir(directoryPath);
+      files.map((name) => allFileNamesSet.add(name));
+    } catch (err) {
+      console.error("Error reading directory:", err);
+      return;
+    }
+  }
+
+  console.log("allFileNamesSet", allFileNamesSet);
+  res.json(Array.from(allFileNamesSet));
+});
+
+// _________________________________
 
 // getAudioPlugins function to get all plugins
 module.exports.getAudioPlugins = asyncHandler(async (req, res) => {
@@ -175,6 +202,85 @@ module.exports.UpdateAudioPlugin = asyncHandler(async (req, res) => {
     res.status(404).json({ message: "Plugin not found" });
     res.status(404);
   }
+});
+
+/// UPDATE MANY PLUGINS /////////////////////////////
+module.exports.UpdateManyAudioPlugins = asyncHandler(async (req, res) => {
+  const dataObjGroup = req.body.dataObj;
+
+  const AudioPlugin = getAudioPluginModelAndCollection(req.user);
+
+  // Convert strings to numbers where needed
+  function groomObjectForDB(dataObj) {
+    const requiresNumber = ["rating"];
+    const requiresBoolean = ["oversampling", "favorite"];
+    const newDataObj = {};
+
+    const stringToBoolean = (string) => {
+      switch (string.toLowerCase().trim()) {
+        case "true":
+        case "yes":
+        case "1":
+          return true;
+
+        case "false":
+        case "no":
+        case "0":
+        case null:
+          return false;
+
+        default:
+          return Boolean(string);
+      }
+    };
+
+    for (const key in dataObj) {
+      if (requiresNumber.includes(key) && isNaN(dataObj[key])) {
+        const newNumber = dataObj[key];
+        newDataObj[key] = parseFloat(dataObj[key].replace('"', ""));
+      } else if (requiresBoolean.includes(key)) {
+        if (dataObj[key].constructor === String) {
+          newDataObj[key] = stringToBoolean(dataObj[key]);
+        }
+      } else {
+        newDataObj[key] = dataObj[key];
+      }
+    }
+
+    return newDataObj;
+  }
+
+  ////////////////
+  //Bulk Updates
+  ////////////////
+  let bulk_operations = [];
+
+  for (var dataObj of Object.values(dataObjGroup)) {
+    const groomedDataObject = groomObjectForDB(dataObj);
+
+    bulk_operations.push({
+      updateOne: {
+        filter: { _id: groomedDataObject.dbID },
+        update: groomedDataObject,
+      },
+    });
+  }
+
+  AudioPlugin.bulkWrite(bulk_operations)
+    .then((bulkWriteOpResult) => {
+      console.log("BULK update OK");
+      res.status(200).json({
+        message: "All items update successfully.",
+        doc: bulkWriteOpResult,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).json({
+        message: "Error when trying to save the plugin.",
+        err: err,
+      });
+    });
 });
 
 module.exports.RemoveAudioPlugin = asyncHandler(async (req, res) => {

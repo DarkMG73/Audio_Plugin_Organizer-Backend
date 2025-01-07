@@ -70,6 +70,8 @@ const whitelist = [
   "https://api-organizer.glassinteractive.com/",
   "http://localhost:1212/",
   "http://localhost:1212",
+  "http://192.168.0.109:3000",
+  "http://192.168.0.109:3000/",
 ];
 
 const options = {
@@ -112,12 +114,19 @@ try {
       req.headers.authorization &&
       req.headers.authorization.split(" ")[0] === "JWT"
     ) {
+      console.log(
+        "%c⚪️►►►► %cline:116%creq.headers.authorization.split( )[1]",
+        "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+        "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+        "color:#fff;background:rgb(1, 77, 103);padding:3px;border-radius:2px",
+        req.headers
+      );
       jsonwebtoken.verify(
         req.headers.authorization.split(" ")[1],
         process.env.SECRET,
         function (err, decode) {
-          console.log("An error of some sort -->", err);
           if (err) {
+            console.log("An error of some sort -->", err);
             if (process.env.SECRET && process.env.SECRET != "undefined") {
               console.log(
                 "There is a temporary server issue. Please try your request again. Error: NS-SVR",
