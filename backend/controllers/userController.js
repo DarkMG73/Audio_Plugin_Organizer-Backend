@@ -76,9 +76,9 @@ module.exports.sign_in = asyncHandler(async (req, res) => {
               token: jwt.sign(
                 { email: user.email, fullName: user.fullName, _id: user._id },
                 process.env.SECRET,
-                { expiresIn: "1 day" } // The httpOnly cookie express in 12 hours, so this would only apply if that cookie is tampered with.
+                { expiresIn: "1d" } // The httpOnly cookie express in 24 hours, so this would only apply if that cookie is tampered with.
               ),
-
+              isAdmin: user.isAdmin,
               // ._doc required for getting at the document only when passing the Mongoose response.
               ...userProps(user._doc),
             };
@@ -106,7 +106,7 @@ module.exports.sign_in = asyncHandler(async (req, res) => {
               token: jwt.sign(
                 { email: user.email, fullName: user.fullName, _id: user._id },
                 process.env.SECRET,
-                { expiresIn: "1 day" } // The httpOnly cookie expires in 12 hours, so this would only apply if that cookie is tampered with.
+                { expiresIn: "1d" } // The httpOnly cookie expires in 12 hours, so this would only apply if that cookie is tampered with.
               ),
 
               // ._doc required for getting at the document only when passing the Mongoose response.
@@ -498,7 +498,7 @@ exports.forgot_password = function (req, res) {
             },
             process.env.SECRET,
 
-            { expiresIn: "10 minutes" } // The httpOnly cookie expires in 10 minutes, so this would only apply if that cookie is tampered with.
+            { expiresIn: "1d" } // The httpOnly cookie expires in 10 minutes, so this would only apply if that cookie is tampered with.
           );
 
           let domain = process.env.DOMAIN;

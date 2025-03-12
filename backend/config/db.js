@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const User = require("../models/userModel.js");
 const AudioPlugin = require("../models/pluginModel.js");
+const AppVersion = require("../models/appVersionModel.js");
+const AdminData = require("../models/adminDataModel.js");
 
 const connectDB = async () => {
   try {

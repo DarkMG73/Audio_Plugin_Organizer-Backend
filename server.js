@@ -4,6 +4,7 @@ const userRoute = require("./backend/routes/userRoute.js");
 // import User = require(".)/backend/models/userModel";
 const adminRoute = require("./backend/routes/adminRoute.js");
 const audioPluginRoute = require("./backend/routes/audioPluginRoute.js");
+const appVersionRoute = require("./backend/routes/appVersionRoute.js");
 const bodyParser = require("body-parser");
 const jsonwebtoken = require("jsonwebtoken");
 const express = require("express");
@@ -72,6 +73,7 @@ const whitelist = [
   "http://localhost:1212",
   "http://192.168.0.109:3000",
   "http://192.168.0.109:3000/",
+  "http://192.168.1.119:3000",
 ];
 
 const options = {
@@ -168,6 +170,9 @@ try {
 
   //Creating API for Audio Plugin Info
   app.use("/api/all-plugins", pluginLimiter, audioPluginRoute);
+
+  //Creating API for APP VERSIONS
+  app.use("/api/app-versions", pluginLimiter, appVersionRoute);
 
   //Creating API for admin functions
   app.use("/api/special-admin/", userLimiter, adminRoute);

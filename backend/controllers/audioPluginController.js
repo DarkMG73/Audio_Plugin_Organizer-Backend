@@ -3,6 +3,19 @@ const asyncHandler = require("express-async-handler");
 const mongoose = require("mongoose");
 const adminList = require("../data/adminList.js");
 const fs = require("fs");
+const cloudinary = require("cloudinary");
+
+cloudinary.config({
+  cloud_name: "do0dxcsdm",
+  api_key: "571465655518481",
+  api_secret: "iRVu-xBhZ-qe_zf6wwE8bF_cxd4", // Click 'View API Keys' above to copy your API secret
+});
+
+//Find Subfolders - DEV ONLY
+// cloudinary.v2.api
+//   .sub_folders("App-Audio_Plugin_Organizer/")
+//   .then((res) => console.log("res3 ===>", res))
+//   .catch((err) => console.log("ERR ===>", err));
 
 function getAudioPluginModelAndCollection(user) {
   let collection = user ? user._id : "all-plugins";
@@ -16,7 +29,7 @@ function getAudioPluginModelAndCollection(user) {
 module.exports.getAllLocalAudioPlugins = asyncHandler(async (req, res) => {
   const pluginPathsObj = req.query;
   const pluginPathsArray = Object.values(pluginPathsObj);
-  console.log("pluginPathsArray", pluginPathsArray);
+  console.log("pluginPathsArray ", pluginPathsArray);
 
   const allFileNamesSet = new Set();
   for (const directoryPath of Object.values(pluginPathsObj)) {
@@ -40,10 +53,19 @@ module.exports.getAllLocalAudioPlugins = asyncHandler(async (req, res) => {
 
 // getAudioPlugins function to get all plugins
 module.exports.getAudioPlugins = asyncHandler(async (req, res) => {
+  console.log("%c⚪️►►►► cloudinary", cloudinary);
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
-  console.log("AudioPlugin", AudioPlugin);
+  console.log("AudioPlugin===>", AudioPlugin);
   const audioPlugins = await AudioPlugin.find({});
-  res.json(audioPlugins);
+
+  // Get data on all OEM images
+  const imagesOEMData = await cloudinary.v2.search
+    .expression("asset_folder: App-Audio_Plugin_Organizer/images-oem")
+    .sort_by("public_id", "desc")
+    .max_results(300)
+    .execute();
+
+  res.json({ audioPlugins, imagesOEMData: imagesOEMData?.resources });
 });
 
 // getAudioPluginBy_Id function to retrieve user by id
@@ -133,6 +155,13 @@ module.exports.AddManyAudioPlugins = asyncHandler(async (req, res, next) => {
 /// UPDATE A PLUGIN /////////////////////////////
 module.exports.UpdateAudioPlugin = asyncHandler(async (req, res) => {
   const dataObj = req.body.dataObj;
+  console.log(
+    "%c⚪️►►►► %cline:157%cdataObj",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(60, 79, 57);padding:3px;border-radius:2px",
+    dataObj
+  );
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
   // Convert strings to numbers where needed
@@ -163,10 +192,11 @@ module.exports.UpdateAudioPlugin = asyncHandler(async (req, res) => {
       if (requiresNumber.includes(key) && isNaN(dataObj[key])) {
         const newNumber = dataObj[key];
         newDataObj[key] = parseFloat(dataObj[key].replace('"', ""));
-      } else if (requiresBoolean.includes(key)) {
-        if (dataObj[key].constructor === String) {
-          newDataObj[key] = stringToBoolean(dataObj[key]);
-        }
+      } else if (
+        requiresBoolean.includes(key) &&
+        dataObj[key].constructor === String
+      ) {
+        newDataObj[key] = stringToBoolean(dataObj[key]);
       } else {
         newDataObj[key] = dataObj[key];
       }
@@ -207,6 +237,13 @@ module.exports.UpdateAudioPlugin = asyncHandler(async (req, res) => {
 /// UPDATE MANY PLUGINS /////////////////////////////
 module.exports.UpdateManyAudioPlugins = asyncHandler(async (req, res) => {
   const dataObjGroup = req.body.dataObj;
+  console.log(
+    "%c⚪️►►►► %cline:231%cdataObjGroup",
+    "color:#fff;background:#ee6f57;padding:3px;border-radius:2px",
+    "color:#fff;background:#1f3c88;padding:3px;border-radius:2px",
+    "color:#fff;background:rgb(89, 61, 67);padding:3px;border-radius:2px",
+    dataObjGroup
+  );
 
   const AudioPlugin = getAudioPluginModelAndCollection(req.user);
 
@@ -238,10 +275,11 @@ module.exports.UpdateManyAudioPlugins = asyncHandler(async (req, res) => {
       if (requiresNumber.includes(key) && isNaN(dataObj[key])) {
         const newNumber = dataObj[key];
         newDataObj[key] = parseFloat(dataObj[key].replace('"', ""));
-      } else if (requiresBoolean.includes(key)) {
-        if (dataObj[key].constructor === String) {
-          newDataObj[key] = stringToBoolean(dataObj[key]);
-        }
+      } else if (
+        requiresBoolean.includes(key) &&
+        dataObj[key].constructor === String
+      ) {
+        newDataObj[key] = stringToBoolean(dataObj[key]);
       } else {
         newDataObj[key] = dataObj[key];
       }
